@@ -11,7 +11,7 @@ const SignUpMutation = gql`
   mutation SignUpMutation($email: String!, $password: String!) {
     signUp(input: { email: $email, password: $password }) {
       user {
-        id
+        _id
         email
       }
     }

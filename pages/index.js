@@ -7,7 +7,7 @@ import { useRouter } from 'next/router'
 const ViewerQuery = gql`
   query ViewerQuery {
     viewer {
-      id
+      _id
       email
     }
   }

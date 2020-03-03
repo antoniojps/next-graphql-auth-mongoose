@@ -1,5 +1,6 @@
 import gql from 'graphql-tag'
 import { typeDef as User } from './schemas/user'
+import { typeDef as Pagination } from './schemas/pagination'
 
 const setup = gql`
   scalar DateTime
@@ -23,6 +24,7 @@ const setup = gql`
 const typeDefs = [
   setup,
   User,
+  Pagination,
 ]
 
 export default typeDefs

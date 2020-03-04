@@ -5,11 +5,15 @@ import jwt from 'jsonwebtoken'
 import getConfig from 'next/config'
 import bcrypt from 'bcrypt'
 import User from './../../pages/api/_models/user'
+import { secure } from './../utils/filters'
 
 export const typeDef = gql`
   type User {
     _id: ID!
     email: String!
+    username: String
+    admin: Boolean
+    moderator: Boolean
   }
 
   input SignUpInput {
@@ -60,20 +64,9 @@ function validPassword(user, password) {
 
 export const resolvers = {
   Query: {
-    async viewer(_parent, _args, context, _info) {
-      const { token } = cookie.parse(context.req.headers.cookie ?? '')
-      if (token) {
-        try {
-          const { id, email } = jwt.verify(token, JWT_SECRET)
-
-          return User.findByEmail(email)
-        } catch {
-          throw new AuthenticationError(
-            'Authentication token is invalid, please log in'
-          )
-        }
-      }
-    },
+    viewer: secure((_parent, _args, context, _info) => {
+      return context.user
+    }),
   },
   Mutation: {
     async signUp(_parent, args, _context, _info) {

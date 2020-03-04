@@ -23,14 +23,6 @@ const UserSchema = mongoose.Schema({
     type: String,
     trim: true,
   },
-  name: {
-    type: String,
-    trim: true,
-  },
-  surname: {
-    type: String,
-    trim: true,
-  },
   admin: {
     type: Boolean,
     sparce: true,

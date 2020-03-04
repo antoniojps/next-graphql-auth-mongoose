@@ -1,4 +1,4 @@
-# Next-graphql-auth-jwt-mongoose boilerplate
+# Next-graphql-auth-jwt boilerplate
 
 :construction:
 

@@ -1,6 +1,7 @@
 
-import mongooseConnectionMiddleware from './database';
+import databaseConnection from './database';
+import jwtParser from './jwt'
 
-const middlewareHandler = handler => mongooseConnectionMiddleware(handler);
+const middlewareHandler = handler => databaseConnection(jwtParser(handler));
 
 export default middlewareHandler;

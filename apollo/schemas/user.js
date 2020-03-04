@@ -47,7 +47,7 @@ export const typeDef = gql`
   }
 `
 
-const JWT_SECRET = getConfig().serverRuntimeConfig.JWT_SECRET
+const { JWT_SECRET, JWT_ISSUER, JWT_AUDIENCE } = getConfig().serverRuntimeConfig
 
 async function createUser(data) {
   const salt = bcrypt.genSaltSync()
@@ -65,7 +65,7 @@ function validPassword(user, password) {
 export const resolvers = {
   Query: {
     viewer: secure((_parent, _args, context, _info) => {
-      return context.user
+      return context.req.user
     }),
   },
   Mutation: {
@@ -76,12 +76,15 @@ export const resolvers = {
 
     async signIn(_parent, args, context, _info) {
       const user = await User.findByEmail(args.input.email)
+      const { _id, email, admin, moderator } = user
       if (user && validPassword(user, args.input.password)) {
         const token = jwt.sign(
-          { email: user.email, id: user.id, time: new Date() },
+          { _id, email, admin, moderator },
           JWT_SECRET,
           {
             expiresIn: '6h',
+            issuer: JWT_ISSUER,
+            audience: JWT_AUDIENCE
           }
         )
 

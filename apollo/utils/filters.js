@@ -13,17 +13,8 @@ const JWT_SECRET = getConfig().serverRuntimeConfig.JWT_SECRET
 
 export function secure (func, admin = false, moderator = false) {
   return async (root, args, context) => {
-    let user = null
-    const { token } = cookie.parse(context.req.headers.cookie ?? '')
-    if (!token) throw new AuthenticationError('Unauthenticated')
-    if (token) {
-      try {
-        const { email } = jwt.verify(token, JWT_SECRET)
-        user = await User.findByEmail(email)
-      } catch {
-        throw new AuthenticationError('Unauthenticated')
-      }
-    }
+    let { user } = context.req
+    if (!user) throw new AuthenticationError('Unauthenticated')
     // admin only
     if (admin && !moderator && !user.admin) {
       throw new ForbiddenError('Unauthorized')

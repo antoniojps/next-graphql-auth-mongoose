@@ -3,7 +3,7 @@ import getConfig from 'next/config'
 
 const MONGODB_URI = getConfig().serverRuntimeConfig.MONGODB_URI
 
-const mongooseConnectionMiddleware = (
+const databaseConnection = (
   handler,
 ) => async (req, res) => {
   const [connection] = mongoose.connections
@@ -23,4 +23,4 @@ const mongooseConnectionMiddleware = (
   return handler(req, res)
 }
 
-export default mongooseConnectionMiddleware
+export default databaseConnection

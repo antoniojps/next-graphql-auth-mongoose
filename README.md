@@ -1,7 +1,9 @@
 # Next-graphql-auth-jwt-mongoose boilerplate
 
+:construction:
+
 ```diff
-- Work in progress :construction_worker:
+- Work in progress
 ```
 
 # Apollo Server and Client Auth Example

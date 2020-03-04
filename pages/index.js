@@ -28,7 +28,7 @@ const Index = () => {
   if (data && data.viewer) {
     return (
       <div>
-        You're signed in as {data.viewer.email} goto{' '}
+        You're signed in as {data.viewer.email} with id ${data.viewer._id} goto{' '}
         <Link href="/about">
           <a>static</a>
         </Link>{' '}

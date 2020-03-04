@@ -15,11 +15,11 @@ const ViewerQuery = gql`
 
 const Index = () => {
   const router = useRouter()
-  const { data, loading } = useQuery(ViewerQuery)
+  const { data, loading, error } = useQuery(ViewerQuery)
 
   if (
     loading === false &&
-    data.viewer === null &&
+    error &&
     typeof window !== 'undefined'
   ) {
     router.push('/signin')

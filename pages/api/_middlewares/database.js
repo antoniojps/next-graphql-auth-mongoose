@@ -1,4 +1,7 @@
 import mongoose from 'mongoose'
+import getConfig from 'next/config'
+
+const MONGODB_URI = getConfig().serverRuntimeConfig.MONGODB_URI
 
 const mongooseConnectionMiddleware = (
   handler,
@@ -6,7 +9,7 @@ const mongooseConnectionMiddleware = (
   const [connection] = mongoose.connections
   if (connection.readyState !== 1) {
     try {
-      await mongoose.connect('mongodb://localhost:27017/Test', {
+      await mongoose.connect(MONGODB_URI, {
         useNewUrlParser: true,
         useFindAndModify: false,
         useCreateIndex: true,

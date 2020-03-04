@@ -127,7 +127,6 @@ function initApolloClient(ctx, initialState) {
 function createApolloClient(ctx = {}, initialState = {}) {
   const ssrMode = typeof window === 'undefined'
   const cache = new InMemoryCache().restore(initialState)
-
   // Check out https://github.com/zeit/next.js/pull/4611 if you want to use the AWSAppSyncClient
   return new ApolloClient({
     ssrMode,

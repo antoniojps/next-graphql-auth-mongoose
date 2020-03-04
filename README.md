@@ -1,3 +1,9 @@
+# Next-graphql-auth-jwt-mongoose boilerplate
+
+```diff
+- Work in progress :construction_worker:
+```
+
 # Apollo Server and Client Auth Example
 
 [Apollo](https://www.apollographql.com/client/) is a GraphQL client that allows you to easily query the exact data you need from a GraphQL server. In addition to fetching and mutating data, Apollo analyzes your queries and their results to construct a client-side cache of your data, which is kept up to date as further queries and mutations are run, fetching more results from the server.

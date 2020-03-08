@@ -1,5 +1,5 @@
 import sgMail from '@sendgrid/mail'
-import { errSchema, resSchema } from './utils/schemas'
+import { errSchema, resSchema } from './_utils/schemas'
 import getConfig from 'next/config'
 
 const { EMAIL_API_KEY, EMAIL_SENDER } = getConfig().serverRuntimeConfig

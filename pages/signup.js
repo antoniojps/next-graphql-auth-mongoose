@@ -36,7 +36,7 @@ function SignUp() {
         },
       })
 
-      router.push('/signin')
+      router.push('/')
     } catch (error) {
       setErrorMsg(getErrorMessage(error))
     }

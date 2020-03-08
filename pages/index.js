@@ -9,6 +9,10 @@ const ViewerQuery = gql`
     viewer {
       _id
       email
+      username
+      admin
+      moderator
+      verified
     }
   }
 `
@@ -27,20 +31,25 @@ const Index = () => {
 
   if (data && data.viewer) {
     return (
-      <div>
-        You're signed in as {data.viewer.email} with id ${data.viewer._id} goto{' '}
-        <Link href="/about">
-          <a>static</a>
-        </Link>{' '}
-        page. or{' '}
-        <Link href="/signout">
-          <a>signout</a>
-        </Link>
-      </div>
+      <>
+        <div>
+          You're signed in as {data.viewer.email} with id ${data.viewer._id} goto{' '}
+          <Link href="/about">
+            <a>static</a>
+          </Link>{' '}
+          page. or{' '}
+          <Link href="/signout">
+            <a>signout</a>
+          </Link>
+        </div>
+        <code>
+          {JSON.stringify(data.viewer, null, 2)}
+        </code>
+      </>
     )
   }
-
-  return <p>Loading...</p>
+  if (loading) <p>Loading...</p>
+  return <p>User not found</p>
 }
 
 export default withApollo(Index)

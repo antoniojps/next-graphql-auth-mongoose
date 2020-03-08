@@ -7,6 +7,8 @@ import bcrypt from 'bcrypt'
 import User from './../../pages/api/_models/user'
 import { secure } from './../utils/filters'
 
+const { JWT_SECRET, JWT_ISSUER, JWT_AUDIENCE } = getConfig().serverRuntimeConfig
+
 export const typeDef = gql`
   type User {
     _id: ID!
@@ -14,6 +16,7 @@ export const typeDef = gql`
     username: String
     admin: Boolean
     moderator: Boolean
+    verified: Boolean
   }
 
   input SignUpInput {
@@ -47,15 +50,51 @@ export const typeDef = gql`
   }
 `
 
-const { JWT_SECRET, JWT_ISSUER, JWT_AUDIENCE } = getConfig().serverRuntimeConfig
-
 async function createUser(data) {
   const salt = bcrypt.genSaltSync()
   const newUser = {
     email: data.email,
     password: bcrypt.hashSync(data.password, salt),
+    verified: false,
   }
   return await User.createUser(newUser)
+}
+
+function login(user, context) {
+  const { _id, email, admin, moderator } = user
+  const token = jwt.sign(
+    { _id, email, admin, moderator },
+    JWT_SECRET,
+    {
+      expiresIn: '6h',
+      issuer: JWT_ISSUER,
+      audience: JWT_AUDIENCE
+    }
+  )
+
+  context.res.setHeader(
+    'Set-Cookie',
+    cookie.serialize('token', token, {
+      httpOnly: true,
+      maxAge: 6 * 60 * 60,
+      path: '/',
+      sameSite: 'lax',
+      secure: process.env.NODE_ENV === 'production',
+    })
+  )
+}
+
+function logout(context) {
+  context.res.setHeader(
+    'Set-Cookie',
+    cookie.serialize('token', '', {
+      httpOnly: true,
+      maxAge: -1,
+      path: '/',
+      sameSite: 'lax',
+      secure: process.env.NODE_ENV === 'production',
+    })
+  )
 }
 
 function validPassword(user, password) {
@@ -64,58 +103,36 @@ function validPassword(user, password) {
 
 export const resolvers = {
   Query: {
-    viewer: secure((_parent, _args, context, _info) => {
-      return context.req.user
+    viewer: secure(async (_parent, _args, context, _info) => {
+      const user = await User.findByEmail(context.req.user.email)
+      if (!user) {
+        logout(context)
+        throw new AuthenticationError('User not found')
+      }
+      return user
     }),
   },
   Mutation: {
-    async signUp(_parent, args, _context, _info) {
+    async signUp(_parent, args, context, _info) {
       const user = await createUser(args.input)
+      login(user, context)
       return { user }
     },
 
     async signIn(_parent, args, context, _info) {
       const user = await User.findByEmail(args.input.email)
+      if (!user) throw new AuthenticationError('User not found')
+
       const { _id, email, admin, moderator } = user
       if (user && validPassword(user, args.input.password)) {
-        const token = jwt.sign(
-          { _id, email, admin, moderator },
-          JWT_SECRET,
-          {
-            expiresIn: '6h',
-            issuer: JWT_ISSUER,
-            audience: JWT_AUDIENCE
-          }
-        )
-
-        context.res.setHeader(
-          'Set-Cookie',
-          cookie.serialize('token', token, {
-            httpOnly: true,
-            maxAge: 6 * 60 * 60,
-            path: '/',
-            sameSite: 'lax',
-            secure: process.env.NODE_ENV === 'production',
-          })
-        )
-
+        login(user, context)
         return { user }
       }
 
       throw new UserInputError('Invalid email and password combination')
     },
     async signOut(_parent, _args, context, _info) {
-      context.res.setHeader(
-        'Set-Cookie',
-        cookie.serialize('token', '', {
-          httpOnly: true,
-          maxAge: -1,
-          path: '/',
-          sameSite: 'lax',
-          secure: process.env.NODE_ENV === 'production',
-        })
-      )
-
+      logout(context)
       return true
     },
   },

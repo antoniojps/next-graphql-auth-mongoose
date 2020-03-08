@@ -2,7 +2,7 @@ import React from 'react'
 import { useMutation, useApolloClient } from '@apollo/react-hooks'
 import gql from 'graphql-tag'
 import { useRouter } from 'next/router'
-import { withApollo } from '../apollo/client'
+import { withApollo } from '../graphql/client'
 
 const SignOutMutation = gql`
   mutation SignOutMutation {

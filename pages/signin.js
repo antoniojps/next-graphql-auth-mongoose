@@ -1,10 +1,10 @@
 import React from 'react'
 import Link from 'next/link'
-import { withApollo } from '../apollo/client'
+import { withApollo } from '../graphql/client'
 import gql from 'graphql-tag'
 import { useMutation, useApolloClient } from '@apollo/react-hooks'
 import Field from '../components/field'
-import { getErrorMessage } from '../lib/form'
+import { getErrorMessage } from '../utils/form'
 import { useRouter } from 'next/router'
 
 const SignInMutation = gql`

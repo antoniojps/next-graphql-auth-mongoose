@@ -1,6 +1,6 @@
 import { ApolloServer } from 'apollo-server-micro'
-import { schema } from '../../apollo/schema'
-import middleware from './_middlewares/middleware'
+import { schema } from '../../graphql/schema'
+import middleware from './../../utils/middlewares/middleware'
 
 const apolloServer = new ApolloServer({
   schema,

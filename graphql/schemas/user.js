@@ -4,7 +4,7 @@ import cookie from 'cookie'
 import jwt from 'jsonwebtoken'
 import getConfig from 'next/config'
 import bcrypt from 'bcrypt'
-import User from './../../pages/api/_models/user'
+import User from './../../models/user'
 import { secure } from './../utils/filters'
 
 const { JWT_SECRET, JWT_ISSUER, JWT_AUDIENCE } = getConfig().serverRuntimeConfig

@@ -7,7 +7,7 @@ import {
 import cookie from 'cookie'
 import jwt from 'jsonwebtoken'
 import getConfig from 'next/config'
-import User from './../../pages/api/_models/user'
+import User from './../../models/user'
 
 const JWT_SECRET = getConfig().serverRuntimeConfig.JWT_SECRET
 

@@ -24,3 +24,8 @@ next.config.js
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+node_modules/
+npm-debug.log*
+build/
+dummy

@@ -3,6 +3,7 @@ import gql from 'graphql-tag';
 import Link from 'next/link';
 import { useQuery } from '@apollo/react-hooks';
 import { useRouter } from 'next/router';
+import { Container, Row, Col } from 'styled-bootstrap-grid';
 
 const CurrentUserQuery = gql`
   query CurrentUserQuery {
@@ -27,24 +28,40 @@ const Index = () => {
 
   if (data && data.currentUser) {
     return (
-      <>
-        <div>
+      <Container>
+        <Row>
+          <h1>Logged in</h1>
+        </Row>
+        <Row>
+          <p>Email: {data.currentUser.email}</p>
           You're signed in as {data.currentUser.email} with id $
           {data.currentUser._id} goto{' '}
           <Link href="/about">
             <a>static</a>
           </Link>{' '}
-          page. or{' '}
+          page.
+        </Row>
+        <Row style={{ paddingTop: '12px' }}>
           <Link href="/signout">
-            <a>signout</a>
+            <button>
+              <a>signout</a>
+            </button>
           </Link>
-        </div>
-        <code>{JSON.stringify(data.currentUser, null, 2)}</code>
-      </>
+        </Row>
+      </Container>
     );
   }
-  if (loading) return <p>Loading...</p>;
-  return <p>User not found</p>;
+  if (loading)
+    return (
+      <Container>
+        <p>Loading...</p>
+      </Container>
+    );
+  return (
+    <Container>
+      <p>User not found...</p>
+    </Container>
+  );
 };
 
 export default withApollo({ ssr: true })(Index);

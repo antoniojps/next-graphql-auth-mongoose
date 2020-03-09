@@ -2,7 +2,7 @@ import { ApolloServer } from 'apollo-server-micro'
 import { schema } from '../../graphql/schema'
 import middleware from './../../utils/middlewares/middleware'
 
-const apolloServer = new ApolloServer({
+export const apolloServer = new ApolloServer({
   schema,
   context(ctx) {
     return ctx

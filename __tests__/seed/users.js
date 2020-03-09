@@ -11,11 +11,12 @@ const userFourID = new ObjectID()
 
 const { JWT_SECRET, JWT_AUDIENCE, JWT_ISSUER } = getConfig().serverRuntimeConfig
 
-export function generateAuthToken (id, admin, moderator) {
+export function generateAuthToken ({id, email}, admin, moderator) {
   const token = jsonwebtoken
     .sign(
       {
         id,
+        email,
         admin: !!admin,
         moderator: !!moderator,
       },
@@ -61,14 +62,29 @@ export const defaultUsers = {
 }
 
 export const usersTokens = {
-  admin: generateAuthToken(defaultUsers.admin._id.toHexString(), true),
+  admin: generateAuthToken(
+    {
+    id: defaultUsers.admin._id.toHexString(),
+    email: defaultUsers.admin.email
+    },
+    true
+  ),
   moderator: generateAuthToken(
-    defaultUsers.moderator._id.toHexString(),
+    {
+      id: defaultUsers.moderator._id.toHexString(),
+      email: defaultUsers.moderator.email,
+    },
     false,
     true
   ),
-  normal: generateAuthToken(defaultUsers.normal._id.toHexString()),
-  normalAlt: generateAuthToken(defaultUsers.normalAlt._id.toHexString()),
+  normal: generateAuthToken({
+    id: defaultUsers.normal._id.toHexString(),
+    email: defaultUsers.normal.email
+  }),
+  normalAlt: generateAuthToken({
+    id: defaultUsers.normalAlt._id.toHexString(),
+    email: defaultUsers.normalAlt.email
+  }),
 }
 
 export const populateUsers = () => {
@@ -78,7 +94,6 @@ export const populateUsers = () => {
         new User(defaultUsers[key]).save()
       )
       Promise.all(createUsers).then(() => {
-        console.log('Populated users', new Date())
         resolve()
       })
     }).catch(err => reject(err))

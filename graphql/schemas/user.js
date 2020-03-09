@@ -40,7 +40,7 @@ export const typeDef = gql`
   extend type Query {
     user(id: ID!): User!
     users: [User]!
-    viewer: User
+    currentUser: User
   }
 
   extend type Mutation {
@@ -103,7 +103,7 @@ function validPassword(user, password) {
 
 export const resolvers = {
   Query: {
-    viewer: secure(async (_parent, _args, context, _info) => {
+    currentUser: secure(async (_parent, _args, context, _info) => {
       const user = await User.findByEmail(context.req.user.email)
       if (!user) {
         logout(context)

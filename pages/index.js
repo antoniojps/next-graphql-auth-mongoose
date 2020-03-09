@@ -4,9 +4,9 @@ import Link from 'next/link'
 import { useQuery } from '@apollo/react-hooks'
 import { useRouter } from 'next/router'
 
-const ViewerQuery = gql`
-  query ViewerQuery {
-    viewer {
+const CurrentUserQuery = gql`
+  query CurrentUserQuery {
+    currentUser {
       _id
       email
       username
@@ -19,21 +19,19 @@ const ViewerQuery = gql`
 
 const Index = () => {
   const router = useRouter()
-  const { data, loading, error } = useQuery(ViewerQuery)
+  const { data, loading, error } = useQuery(CurrentUserQuery)
 
   if (
-    loading === false &&
-    error &&
-    typeof window !== 'undefined'
+    error
   ) {
     router.push('/signin')
   }
 
-  if (data && data.viewer) {
+  if (data && data.currentUser) {
     return (
       <>
         <div>
-          You're signed in as {data.viewer.email} with id ${data.viewer._id} goto{' '}
+          You're signed in as {data.currentUser.email} with id ${data.currentUser._id} goto{' '}
           <Link href="/about">
             <a>static</a>
           </Link>{' '}
@@ -43,12 +41,12 @@ const Index = () => {
           </Link>
         </div>
         <code>
-          {JSON.stringify(data.viewer, null, 2)}
+          {JSON.stringify(data.currentUser, null, 2)}
         </code>
       </>
     )
   }
-  if (loading) <p>Loading...</p>
+  if (loading) return <p>Loading...</p>
   return <p>User not found</p>
 }
 

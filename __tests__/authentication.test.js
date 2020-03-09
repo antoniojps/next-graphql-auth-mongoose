@@ -11,8 +11,8 @@ function createServer(options = { path: '/api/graphql' }) {
   return app
 }
 
-const VIEWER = `{
-  viewer {
+const CURRENT_USER = `{
+  currentUser {
     _id
     email
   }
@@ -24,7 +24,7 @@ describe('authentication', () => {
         const app = createServer()
         const req = request(app)
           .post('/api/graphql')
-          .send({ query: VIEWER })
+          .send({ query: CURRENT_USER })
 
         const res = await req
         expect(res.status).toEqual(200);
@@ -39,11 +39,11 @@ describe('authentication', () => {
         const req = request(app)
           .post('/api/graphql')
           .set('Cookie', `token=${usersTokens.normal}; HttpOnly`)
-          .send({ query: VIEWER })
+          .send({ query: CURRENT_USER })
 
         const res = await req
         expect(res.status).toEqual(200);
-        expect(res.body.data.viewer.email).toBe(
+        expect(res.body.data.currentUser.email).toBe(
           defaultUsers.normal.email
         )
         app.close()

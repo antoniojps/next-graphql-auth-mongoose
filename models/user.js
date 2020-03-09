@@ -1,9 +1,8 @@
-import mongoose from 'mongoose'
-import validator from 'validator'
-import jwt from 'jsonwebtoken'
-import getConfig from 'next/config'
+import mongoose from 'mongoose';
+import validator from 'validator';
+import jwt from 'jsonwebtoken';
 
-const { JWT_SECRET, JWT_ISSUER } = getConfig().serverRuntimeConfig
+const { JWT_SECRET, JWT_ISSUER } = process.env;
 
 // USER
 // schema
@@ -37,72 +36,74 @@ const UserSchema = mongoose.Schema({
   verified: {
     type: Boolean,
     sparce: true,
-  }
-})
+  },
+});
 
 // model methods
 UserSchema.statics = {
-  findByEmail (email) {
+  findByEmail(email) {
     return User.findOne({
       email,
-    })
+    });
   },
-  newUserObj ({email, password}) {
+  newUserObj({ email, password }) {
     return {
       email,
-      password
-    }
+      password,
+    };
   },
   createUser(newUser) {
-    const user = new User(newUser)
-    return user.save()
+    const user = new User(newUser);
+    return user.save();
   },
-}
+};
 
 // instance methods
 UserSchema.methods = {
-  toObj () {
-    const userObj = this.toObject()
-    return userObj
+  toObj() {
+    const userObj = this.toObject();
+    return userObj;
   },
   sendValidationEmail() {
     return new Promise((resolve, reject) => {
-      const user = this
+      const user = this;
       if (user.verified) {
-        reject(Error('Email already verified'))
+        reject(Error('Email already verified'));
       }
-      const token = jsonwebtoken.sign(
-        {
-          _id: user._id,
-          email: user.email,
-        },
-        process.env.JWT_SECRET,
-        {
-          expiresIn: '48h',
-          issuer: process.env.JWT_ISSUER,
-          subject: 'Email validation token',
-        }
-      ).toString()
+      const token = jsonwebtoken
+        .sign(
+          {
+            _id: user._id,
+            email: user.email,
+          },
+          process.env.JWT_SECRET,
+          {
+            expiresIn: '48h',
+            issuer: process.env.JWT_ISSUER,
+            subject: 'Email validation token',
+          }
+        )
+        .toString();
       // send email with token
-      console.log('email sent with token', { token })
-      resolve()
-    })
+      console.log('email sent with token', { token });
+      resolve();
+    });
   },
-  async verify (token) {
+  async verify(token) {
     try {
       const { email } = jwt.verify(token, JWT_SECRET, {
         issuer: JWT_ISSUER,
-      })
-      const user = this
-      user.verified = true
-      return user
+      });
+      const user = this;
+      user.verified = true;
+      return user;
     } catch (e) {
-      throw Error('Invalid email verification token')
+      throw Error('Invalid email verification token');
     }
-  }
-}
+  },
+};
 
 // model
-const User = mongoose.models.User || mongoose.model('User', UserSchema)
+const User = mongoose.models.User || mongoose.model('User', UserSchema);
 
-export default User
+export default User;

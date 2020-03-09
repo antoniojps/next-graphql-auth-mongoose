@@ -1,13 +1,12 @@
-import gql from 'graphql-tag'
-import { AuthenticationError, UserInputError } from 'apollo-server-micro'
-import cookie from 'cookie'
-import jwt from 'jsonwebtoken'
-import getConfig from 'next/config'
-import bcrypt from 'bcrypt'
-import User from './../../models/user'
-import { secure } from './../utils/filters'
+import gql from 'graphql-tag';
+import { AuthenticationError, UserInputError } from 'apollo-server-micro';
+import cookie from 'cookie';
+import jwt from 'jsonwebtoken';
+import bcrypt from 'bcrypt';
+import User from './../../models/user';
+import { secure } from './../utils/filters';
 
-const { JWT_SECRET, JWT_ISSUER, JWT_AUDIENCE } = getConfig().serverRuntimeConfig
+const { JWT_SECRET, JWT_ISSUER, JWT_AUDIENCE } = process.env;
 
 export const typeDef = gql`
   type User {
@@ -48,29 +47,25 @@ export const typeDef = gql`
     signIn(input: SignInInput!): SignInPayload!
     signOut: Boolean!
   }
-`
+`;
 
 async function createUser(data) {
-  const salt = bcrypt.genSaltSync()
+  const salt = bcrypt.genSaltSync();
   const newUser = {
     email: data.email,
     password: bcrypt.hashSync(data.password, salt),
     verified: false,
-  }
-  return await User.createUser(newUser)
+  };
+  return await User.createUser(newUser);
 }
 
 function login(user, context) {
-  const { _id, email, admin, moderator } = user
-  const token = jwt.sign(
-    { _id, email, admin, moderator },
-    JWT_SECRET,
-    {
-      expiresIn: '6h',
-      issuer: JWT_ISSUER,
-      audience: JWT_AUDIENCE
-    }
-  )
+  const { _id, email, admin, moderator } = user;
+  const token = jwt.sign({ _id, email, admin, moderator }, JWT_SECRET, {
+    expiresIn: '6h',
+    issuer: JWT_ISSUER,
+    audience: JWT_AUDIENCE,
+  });
 
   context.res.setHeader(
     'Set-Cookie',
@@ -81,7 +76,7 @@ function login(user, context) {
       sameSite: 'lax',
       secure: process.env.NODE_ENV === 'production',
     })
-  )
+  );
 }
 
 function logout(context) {
@@ -94,46 +89,46 @@ function logout(context) {
       sameSite: 'lax',
       secure: process.env.NODE_ENV === 'production',
     })
-  )
+  );
 }
 
 function validPassword(user, password) {
-  return bcrypt.compareSync(password, user.password)
+  return bcrypt.compareSync(password, user.password);
 }
 
 export const resolvers = {
   Query: {
     currentUser: secure(async (_parent, _args, context, _info) => {
-      const user = await User.findByEmail(context.req.user.email)
+      const user = await User.findByEmail(context.req.user.email);
       if (!user) {
-        logout(context)
-        throw new AuthenticationError('User not found')
+        logout(context);
+        throw new AuthenticationError('User not found');
       }
-      return user
+      return user;
     }),
   },
   Mutation: {
     async signUp(_parent, args, context, _info) {
-      const user = await createUser(args.input)
-      login(user, context)
-      return { user }
+      const user = await createUser(args.input);
+      login(user, context);
+      return { user };
     },
 
     async signIn(_parent, args, context, _info) {
-      const user = await User.findByEmail(args.input.email)
-      if (!user) throw new AuthenticationError('User not found')
+      const user = await User.findByEmail(args.input.email);
+      if (!user) throw new AuthenticationError('User not found');
 
-      const { _id, email, admin, moderator } = user
+      const { _id, email, admin, moderator } = user;
       if (user && validPassword(user, args.input.password)) {
-        login(user, context)
-        return { user }
+        login(user, context);
+        return { user };
       }
 
-      throw new UserInputError('Invalid email and password combination')
+      throw new UserInputError('Invalid email and password combination');
     },
     async signOut(_parent, _args, context, _info) {
-      logout(context)
-      return true
+      logout(context);
+      return true;
     },
   },
-}
+};

@@ -1,13 +1,13 @@
-import merge from 'lodash.merge'
-import { resolvers as UserResolvers } from './schemas/user'
+import merge from 'lodash.merge';
+import { resolvers as UserResolvers } from './schemas/user';
 
 import {
   DateTime,
   PositiveInt,
   EmailAddress,
   URL,
-} from '@okgrow/graphql-scalars'
-import jsonScalar from 'graphql-type-json'
+} from '@okgrow/graphql-scalars';
+import jsonScalar from 'graphql-type-json';
 
 const setupResolvers = {
   // scalars
@@ -20,11 +20,8 @@ const setupResolvers = {
   Query: {},
 
   Mutation: {},
-}
+};
 
-const resolvers = merge(
-  setupResolvers,
-  UserResolvers,
-)
+const resolvers = merge(setupResolvers, UserResolvers);
 
-export default resolvers
+export default resolvers;

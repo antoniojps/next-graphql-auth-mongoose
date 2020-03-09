@@ -3,9 +3,7 @@ module.exports = {
   verbose: true,
   testTimeout: 5000,
   setupFiles: ['<rootDir>/jest.setup.js'],
-  testMatch: [
-    "**/*.test.js"
-  ],
+  testMatch: ['**/*.test.js'],
   collectCoverageFrom: [
     '**/*.{js,jsx,ts,tsx}',
     '!**/*.d.ts',
@@ -22,4 +20,4 @@ module.exports = {
   moduleNameMapper: {
     '^.+\\.module\\.(css|sass|scss)$': 'identity-obj-proxy',
   },
-}
+};

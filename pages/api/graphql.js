@@ -1,13 +1,13 @@
-import { ApolloServer } from 'apollo-server-micro'
-import { schema } from '../../graphql/schema'
-import middleware from './../../utils/middlewares/middleware'
+import { ApolloServer } from 'apollo-server-micro';
+import { schema } from '../../graphql/schema';
+import middleware from './../../utils/middlewares/middleware';
 
 export const apolloServer = new ApolloServer({
   schema,
   context(ctx) {
-    return ctx
+    return ctx;
   },
-})
+});
 
 // custom config
 // https://nextjs.org/docs/api-routes/api-middlewares#custom-config
@@ -15,8 +15,10 @@ export const config = {
   api: {
     bodyParser: false,
   },
-}
+};
 
-const apolloHandler = apolloServer.createHandler({ path: '/api/graphql' })
+const apolloHandler = apolloServer.createHandler({
+  path: process.env.GRAPHQL_ENDPOINT,
+});
 
-export default middleware(apolloHandler)
+export default middleware(apolloHandler);

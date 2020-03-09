@@ -1,17 +1,16 @@
-import { ObjectID } from 'mongodb'
-import User from './../../models/user'
-import jsonwebtoken from 'jsonwebtoken'
-import getConfig from 'next/config'
-import bcrypt from 'bcrypt'
+import { ObjectID } from 'mongodb';
+import User from './../../models/user';
+import jsonwebtoken from 'jsonwebtoken';
+import bcrypt from 'bcrypt';
 
-const userOneID = new ObjectID()
-const userTwoID = new ObjectID()
-const userThreeID = new ObjectID()
-const userFourID = new ObjectID()
+const userOneID = new ObjectID();
+const userTwoID = new ObjectID();
+const userThreeID = new ObjectID();
+const userFourID = new ObjectID();
 
-const { JWT_SECRET, JWT_AUDIENCE, JWT_ISSUER } = getConfig().serverRuntimeConfig
+const { JWT_SECRET, JWT_AUDIENCE, JWT_ISSUER } = process.env;
 
-export function generateAuthToken ({id, email}, admin, moderator) {
+export function generateAuthToken({ id, email }, admin, moderator) {
   const token = jsonwebtoken
     .sign(
       {
@@ -28,11 +27,11 @@ export function generateAuthToken ({id, email}, admin, moderator) {
         subject: id,
       }
     )
-    .toString()
-  return token
+    .toString();
+  return token;
 }
 
-const salt = bcrypt.genSaltSync()
+const salt = bcrypt.genSaltSync();
 
 export const defaultUsers = {
   admin: {
@@ -59,13 +58,13 @@ export const defaultUsers = {
     username: 'normalFour',
     password: bcrypt.hashSync('123', salt),
   },
-}
+};
 
 export const usersTokens = {
   admin: generateAuthToken(
     {
-    id: defaultUsers.admin._id.toHexString(),
-    email: defaultUsers.admin.email
+      id: defaultUsers.admin._id.toHexString(),
+      email: defaultUsers.admin.email,
     },
     true
   ),
@@ -79,23 +78,25 @@ export const usersTokens = {
   ),
   normal: generateAuthToken({
     id: defaultUsers.normal._id.toHexString(),
-    email: defaultUsers.normal.email
+    email: defaultUsers.normal.email,
   }),
   normalAlt: generateAuthToken({
     id: defaultUsers.normalAlt._id.toHexString(),
-    email: defaultUsers.normalAlt.email
+    email: defaultUsers.normalAlt.email,
   }),
-}
+};
 
 export const populateUsers = () => {
   return new Promise((resolve, reject) => {
-    User.deleteMany({}).then(() => {
-      const createUsers = Object.keys(defaultUsers).map(key =>
-        new User(defaultUsers[key]).save()
-      )
-      Promise.all(createUsers).then(() => {
-        resolve()
+    User.deleteMany({})
+      .then(() => {
+        const createUsers = Object.keys(defaultUsers).map(key =>
+          new User(defaultUsers[key]).save()
+        );
+        Promise.all(createUsers).then(() => {
+          resolve();
+        });
       })
-    }).catch(err => reject(err))
-  })
-}
+      .catch(err => reject(err));
+  });
+};

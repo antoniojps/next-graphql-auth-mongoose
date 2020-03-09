@@ -1,8 +1,7 @@
 import sgMail from '@sendgrid/mail';
 import { errSchema, resSchema } from '../../utils/schemas';
-import getConfig from 'next/config';
 
-const { EMAIL_API_KEY, EMAIL_SENDER } = getConfig().serverRuntimeConfig;
+const { EMAIL_API_KEY, EMAIL_SENDER } = process.env;
 
 const sendEmail = async ({ to, username, url }) => {
   sgMail.setApiKey(EMAIL_API_KEY);

@@ -1,6 +1,6 @@
-import gql from 'graphql-tag'
-import { typeDef as User } from './schemas/user'
-import { typeDef as Pagination } from './schemas/pagination'
+import gql from 'graphql-tag';
+import { typeDef as User } from './schemas/user';
+import { typeDef as Pagination } from './schemas/pagination';
 
 const setup = gql`
   scalar DateTime
@@ -19,12 +19,8 @@ const setup = gql`
   type Mutation {
     _empty: String
   }
-`
+`;
 
-const typeDefs = [
-  setup,
-  User,
-  Pagination,
-]
+const typeDefs = [setup, User, Pagination];
 
-export default typeDefs
+export default typeDefs;

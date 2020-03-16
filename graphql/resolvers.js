@@ -2,19 +2,19 @@ import merge from 'lodash.merge';
 import { resolvers as UserResolvers } from './schemas/user';
 
 import {
-  DateTime,
-  PositiveInt,
-  EmailAddress,
-  URL,
-} from '@okgrow/graphql-scalars';
+  DateTimeResolver,
+  PositiveIntResolver,
+  EmailAddressResolver,
+  URLResolver,
+} from 'graphql-scalars';
 import jsonScalar from 'graphql-type-json';
 
 const setupResolvers = {
   // scalars
-  DateTime,
-  PositiveInt,
-  EmailAddress,
-  URL,
+  DateTime: DateTimeResolver,
+  PositiveInt: PositiveIntResolver,
+  EmailAddress: EmailAddressResolver,
+  URL: URLResolver,
   JSON: jsonScalar,
 
   Query: {},

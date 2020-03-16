@@ -4,7 +4,7 @@ import cookie from 'cookie';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 import User from './../../models/user';
-import { secure } from './../utils/filters';
+import { secure, StatusError } from './../utils/filters';
 
 const { JWT_SECRET, JWT_ISSUER, JWT_AUDIENCE } = process.env;
 
@@ -23,17 +23,22 @@ export const typeDef = gql`
     password: String!
   }
 
+  type UserPayload {
+    user: User!
+  }
+
   input SignInInput {
     email: String!
     password: String!
   }
 
-  type SignUpPayload {
-    user: User!
+  type VerifyEmailPayload {
+    email: String!
+    verified: Boolean!
   }
 
-  type SignInPayload {
-    user: User!
+  input VerifyEmailInput {
+    token: String!
   }
 
   extend type Query {
@@ -43,9 +48,11 @@ export const typeDef = gql`
   }
 
   extend type Mutation {
-    signUp(input: SignUpInput!): SignUpPayload!
-    signIn(input: SignInInput!): SignInPayload!
+    signUp(input: SignUpInput!): UserPayload!
+    signIn(input: SignInInput!): UserPayload!
     signOut: Boolean!
+    sendVerificationEmail: Boolean!
+    verifyEmail(input: VerifyEmailInput!): VerifyEmailPayload!
   }
 `;
 
@@ -98,7 +105,7 @@ function validPassword(user, password) {
 
 export const resolvers = {
   Query: {
-    currentUser: secure(async (_parent, _args, context, _info) => {
+    currentUser: secure(async (_parent, _args, context) => {
       const user = await User.findByEmail(context.req.user.email);
       if (!user) {
         logout(context);
@@ -108,27 +115,70 @@ export const resolvers = {
     }),
   },
   Mutation: {
-    async signUp(_parent, args, context, _info) {
+    signUp: async (_parent, args, context) => {
       const user = await createUser(args.input);
       login(user, context);
-      return { user };
+      return {user};
     },
 
-    async signIn(_parent, args, context, _info) {
+    signIn:  async  (_parent, args, context) => {
       const user = await User.findByEmail(args.input.email);
       if (!user) throw new AuthenticationError('User not found');
 
       const { _id, email, admin, moderator } = user;
       if (user && validPassword(user, args.input.password)) {
         login(user, context);
-        return { user };
+        return {user};
       }
-
       throw new UserInputError('Invalid email and password combination');
     },
-    async signOut(_parent, _args, context, _info) {
+    signOut: async (_parent, _args, context) => {
       logout(context);
       return true;
     },
+    sendVerificationEmail: secure(async (_parent, _args, context) => {
+      const user = context.req.user
+      if (user.verified) throw new StatusError(400, 'Email already verified')
+      const token = jwt
+        .sign(
+          {
+            _id: user._id,
+            email: user.email,
+          },
+          process.env.JWT_SECRET,
+          {
+            expiresIn: '48h',
+            issuer: process.env.JWT_ISSUER,
+            subject: 'Email validation token',
+          }
+        )
+        .toString();
+      console.log(token)
+      // send email
+      return true
+    }),
+    verifyEmail: secure(async (_parent, args, context) => {
+      const { token } = args.input
+      const user = await User.findByEmail(context.req.user.email);
+      if (!user) {
+        logout(context);
+        throw new AuthenticationError('User not found');
+      }
+      try {
+        const { email: emailVerified } = jwt.verify(token, JWT_SECRET, {
+          issuer: JWT_ISSUER,
+        });
+        if (user.email !== emailVerified) throw new StatusError(401, 'User does not match');
+        user.verified = true;
+        await user.save()
+        return {
+          email: user.email,
+          verified: true,
+        }
+      } catch (e) {
+        if (process.env !== 'production') throw new Error(e.message)
+        throw Error('Invalid email verification token');
+      }
+    }),
   },
 };

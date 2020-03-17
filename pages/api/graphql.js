@@ -1,9 +1,17 @@
 import { ApolloServer } from 'apollo-server-micro';
-import { schema } from '../../graphql/schema';
+import typeDefs from '../../graphql/typeDefs';
+import resolvers from '../../graphql/resolvers';
+
+import { AuthDirective } from '../../graphql/directives'
+
 import middleware from './../../utils/middlewares/middleware';
 
 export const apolloServer = new ApolloServer({
-  schema,
+  typeDefs,
+  resolvers,
+  schemaDirectives: {
+    auth: AuthDirective,
+  },
   context(ctx) {
     return ctx;
   },

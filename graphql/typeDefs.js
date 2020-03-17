@@ -3,6 +3,15 @@ import { typeDef as User } from './schemas/user';
 import { typeDef as Pagination } from './schemas/pagination';
 
 const setup = gql`
+  # Directives
+  directive @auth(requires: Role = user) on FIELD_DEFINITION
+  enum Role {
+    admin
+    moderator
+    owner
+    user
+  }
+
   scalar DateTime
   scalar EmailAddress
   scalar PositiveInt

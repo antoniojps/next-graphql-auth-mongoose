@@ -14,9 +14,7 @@ const databaseConnection = handler => async (req, res) => {
         useCreateIndex: true,
         useUnifiedTopology: true,
       });
-      if (isTest) {
-        await populateTestDatabase();
-      }
+      if (isTest) await populateTestDatabase();
     } catch (err) {
       console.log('Failed connection to MONGO DATABASE');
       console.error(err.message);

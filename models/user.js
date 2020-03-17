@@ -37,6 +37,18 @@ const UserSchema = mongoose.Schema({
     type: Boolean,
     sparce: true,
   },
+  verifiedAt: {
+    type: Date,
+    sparce: true,
+  },
+  verificationToken: {
+    type: String,
+    space: true,
+  },
+  verificationTokenSentAt: {
+    type: Date,
+    sparce: true,
+  },
 });
 
 // model methods
@@ -64,6 +76,13 @@ UserSchema.methods = {
     const userObj = this.toObject();
     return userObj;
   },
+  verify() {
+    const user = this
+    user.verified = true
+    user.verificationToken = null
+    user.verifiedAt = Date.now()
+    return user
+  }
 };
 
 // model

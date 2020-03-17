@@ -11,10 +11,8 @@ import { Container, Row, Col } from 'styled-bootstrap-grid';
 const SignInMutation = gql`
   mutation SignInMutation($email: String!, $password: String!) {
     signIn(input: { email: $email, password: $password }) {
-      user {
-        _id
-        email
-      }
+      _id
+      email
     }
   }
 `;
@@ -39,7 +37,7 @@ function SignIn() {
           password: passwordElement.value,
         },
       });
-      if (data.signIn.user) {
+      if (data.signIn._id) {
         await router.push('/');
       }
     } catch (error) {

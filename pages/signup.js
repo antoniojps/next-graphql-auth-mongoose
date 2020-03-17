@@ -11,10 +11,8 @@ import { Container, Row } from 'styled-bootstrap-grid';
 const SignUpMutation = gql`
   mutation SignUpMutation($email: String!, $password: String!) {
     signUp(input: { email: $email, password: $password }) {
-      user {
-        _id
-        email
-      }
+      _id
+      email
     }
   }
 `;

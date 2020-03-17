@@ -5,17 +5,20 @@ import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 import User from './../../models/user';
 import { secure, StatusError } from './../utils/filters';
+import { v1 as uuidv1 } from 'uuid';
 
 const { JWT_SECRET, JWT_ISSUER, JWT_AUDIENCE } = process.env;
 
 export const typeDef = gql`
   type User {
     _id: ID!
-    email: String!
+    email: String! @auth(requires: owner)
     username: String
     admin: Boolean
     moderator: Boolean
     verified: Boolean
+    verifiedAt: DateTime
+    verificationTokenSentAt: DateTime
   }
 
   input SignUpInput {
@@ -23,22 +26,13 @@ export const typeDef = gql`
     password: String!
   }
 
-  type UserPayload {
-    user: User!
-  }
-
   input SignInInput {
     email: String!
     password: String!
   }
 
-  type VerifyEmailPayload {
-    email: String!
-    verified: Boolean!
-  }
-
   input VerifyEmailInput {
-    token: String!
+    verificationToken: String!
   }
 
   extend type Query {
@@ -48,11 +42,10 @@ export const typeDef = gql`
   }
 
   extend type Mutation {
-    signUp(input: SignUpInput!): UserPayload!
-    signIn(input: SignInInput!): UserPayload!
+    signUp(input: SignUpInput!): User!
+    signIn(input: SignInInput!): User!
     signOut: Boolean!
-    sendVerificationEmail: Boolean!
-    verifyEmail(input: VerifyEmailInput!): VerifyEmailPayload!
+    verifyEmail(input: VerifyEmailInput!): User!
   }
 `;
 
@@ -62,13 +55,18 @@ async function createUser(data) {
     email: data.email,
     password: bcrypt.hashSync(data.password, salt),
     verified: false,
+    verificationToken: uuidv1(),
+    verificationTokenSentAt: Date.now()
   };
-  return await User.createUser(newUser);
+
+  const savedUser = await User.createUser(newUser);
+  // send verification token
+  return savedUser
 }
 
 function login(user, context) {
   const { _id, email, admin, moderator } = user;
-  const token = jwt.sign({ _id, email, admin, moderator }, JWT_SECRET, {
+  const token = jwt.sign({ id: _id, email, admin, moderator }, JWT_SECRET, {
     expiresIn: '6h',
     issuer: JWT_ISSUER,
     audience: JWT_AUDIENCE,
@@ -99,7 +97,7 @@ function logout(context) {
   );
 }
 
-function validPassword(user, password) {
+function isValidPassword(user, password) {
   return bcrypt.compareSync(password, user.password);
 }
 
@@ -113,12 +111,13 @@ export const resolvers = {
       }
       return user;
     }),
+    user: (root, { id }) => User.findById(id),
   },
   Mutation: {
     signUp: async (_parent, args, context) => {
       const user = await createUser(args.input);
       login(user, context);
-      return {user};
+      return user;
     },
 
     signIn:  async  (_parent, args, context) => {
@@ -126,9 +125,9 @@ export const resolvers = {
       if (!user) throw new AuthenticationError('User not found');
 
       const { _id, email, admin, moderator } = user;
-      if (user && validPassword(user, args.input.password)) {
+      if (user && isValidPassword(user, args.input.password)) {
         login(user, context);
-        return {user};
+        return user;
       }
       throw new UserInputError('Invalid email and password combination');
     },
@@ -136,48 +135,17 @@ export const resolvers = {
       logout(context);
       return true;
     },
-    sendVerificationEmail: secure(async (_parent, _args, context) => {
-      const user = context.req.user
-      if (user.verified) throw new StatusError(400, 'Email already verified')
-      const token = jwt
-        .sign(
-          {
-            _id: user._id,
-            email: user.email,
-          },
-          process.env.JWT_SECRET,
-          {
-            expiresIn: '48h',
-            issuer: process.env.JWT_ISSUER,
-            subject: 'Email validation token',
-          }
-        )
-        .toString();
-      console.log(token)
-      // send email
-      return true
-    }),
     verifyEmail: secure(async (_parent, args, context) => {
-      const { token } = args.input
-      const user = await User.findByEmail(context.req.user.email);
-      if (!user) {
-        logout(context);
-        throw new AuthenticationError('User not found');
-      }
+      const { verificationToken } = args.input
+      const user = await User.findOne({verificationToken});
+      if (!user) throw new StatusError(422, 'Invalid activation token.');
       try {
-        const { email: emailVerified } = jwt.verify(token, JWT_SECRET, {
-          issuer: JWT_ISSUER,
-        });
-        if (user.email !== emailVerified) throw new StatusError(401, 'User does not match');
-        user.verified = true;
+        user.verify()
         await user.save()
-        return {
-          email: user.email,
-          verified: true,
-        }
+        return user
       } catch (e) {
         if (process.env !== 'production') throw new Error(e.message)
-        throw Error('Invalid email verification token');
+        throw Error('Error verifying email');
       }
     }),
   },

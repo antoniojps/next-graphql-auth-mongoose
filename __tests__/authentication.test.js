@@ -1,4 +1,3 @@
-import gql from 'graphql-tag';
 import request from 'supertest';
 import { usersTokens, defaultUsers } from './seed/users';
 import micro from 'micro';
@@ -68,13 +67,11 @@ describe('authentication', () => {
           .send(USER);
 
         const res = await req;
-        expect((res => {
-          expect(res.status).toEqual(200)
-          expect(res.body.data.user._id).toBe(
-            defaultUsers.normal._id.toHexString()
-          )
-          expect(res.body.data.user.email).toBe(defaultUsers.normal.email)
-        }));
+        expect(res.status).toEqual(200)
+        expect(res.body.data.user._id).toBe(
+          defaultUsers.normal._id.toHexString(),
+        )
+        expect(res.body.data.user.email).toBe(defaultUsers.normal.email)
         app.close();
         done();
       })
@@ -86,13 +83,11 @@ describe('authentication', () => {
           .send(USER);
 
         const res = await req;
-        expect((res => {
-          expect(res.status).toEqual(200)
-          expect(res.body.data.user._id).toBe(
-            defaultUsers.normal._id.toHexString()
-          )
-          expect(res.body.data.user.email).toBe(defaultUsers.normal.email)
-        }));
+        expect(res.status).toEqual(200)
+        expect(res.body.data.user._id).toBe(
+          defaultUsers.normal._id.toHexString(),
+        )
+        expect(res.body.data.user.email).toBe(defaultUsers.normal.email)
         app.close();
         done();
       })
@@ -104,13 +99,11 @@ describe('authentication', () => {
           .send(USER);
 
         const res = await req;
-        expect((res => {
-          expect(res.status).toEqual(200)
-          expect(res.body.data.user._id).toBe(
-            defaultUsers.normal._id.toHexString()
-          )
-          expect(res.body.data.user.email).toBe(defaultUsers.normal.email)
-        }));
+        expect(res.status).toEqual(200)
+        expect(res.body.data.user._id).toBe(
+          defaultUsers.normal._id.toHexString(),
+        )
+        expect(res.body.data.user.email).toBe(defaultUsers.normal.email)
         app.close();
         done();
       })
@@ -122,10 +115,8 @@ describe('authentication', () => {
           .send(USER);
 
         const res = await req;
-        expect((res => {
-          expect(res.status).toEqual(200)
-          expect(res.body.errors[0].extensions.code).toBe('Unauthorized field email')
-        }));
+        expect(res.status).toEqual(200)
+        expect(res.body.errors[0].message).toBe('Unauthorized field email')
         app.close();
         done();
       })
@@ -136,10 +127,8 @@ describe('authentication', () => {
           .send(USER);
 
         const res = await req;
-        expect((res => {
-          expect(res.status).toEqual(200)
-          expect(res.body.errors[0].extensions.code).toBe('Unauthenticated field email')
-        }));
+        expect(res.status).toEqual(200)
+        expect(res.body.errors[0].message).toBe('Unauthenticated field email')
         app.close();
         done();
       })

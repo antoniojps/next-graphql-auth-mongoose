@@ -56,7 +56,7 @@ async function createUser(data) {
     password: bcrypt.hashSync(data.password, salt),
     verified: false,
     verificationToken: uuidv1(),
-    verificationTokenSentAt: Date.now()
+    verificationTokenSentAt: Date.now(),
   };
 
   const savedUser = await User.createUser(newUser);
@@ -76,11 +76,11 @@ function login(user, context) {
     'Set-Cookie',
     cookie.serialize('token', token, {
       httpOnly: true,
-      maxAge: 6 * 60 * 60,
+      maxAge: 30 * 24 * 60 * 60,
       path: '/',
       sameSite: 'lax',
       secure: process.env.NODE_ENV === 'production',
-    })
+    }),
   );
 }
 
@@ -93,7 +93,7 @@ function logout(context) {
       path: '/',
       sameSite: 'lax',
       secure: process.env.NODE_ENV === 'production',
-    })
+    }),
   );
 }
 
@@ -123,8 +123,6 @@ export const resolvers = {
     signIn:  async  (_parent, args, context) => {
       const user = await User.findByEmail(args.input.email);
       if (!user) throw new AuthenticationError('User not found');
-
-      const { _id, email, admin, moderator } = user;
       if (user && isValidPassword(user, args.input.password)) {
         login(user, context);
         return user;
@@ -135,7 +133,7 @@ export const resolvers = {
       logout(context);
       return true;
     },
-    verifyEmail: secure(async (_parent, args, context) => {
+    verifyEmail: secure(async (_parent, args) => {
       const { verificationToken } = args.input
       const user = await User.findOne({verificationToken});
       if (!user) throw new StatusError(422, 'Invalid activation token.');

@@ -7,12 +7,12 @@ const jwtParser = handler => {
   return async (req, res) => {
     let user = null;
     const { token } = cookie.parse(
-      req && req.headers && req.headers.cookie ? req.headers.cookie : ''
+      req && req.headers && req.headers.cookie ? req.headers.cookie : '',
     );
     if (token) {
       try {
         user = jwt.verify(token, JWT_SECRET, {
-          expiresIn: '6h',
+          expiresIn: `${30 * 24 * 60 * 60}h`,
           issuer: JWT_ISSUER,
           audience: JWT_AUDIENCE,
         });

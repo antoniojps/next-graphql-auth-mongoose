@@ -6,7 +6,7 @@ import { useMutation, useApolloClient } from '@apollo/react-hooks';
 import Field from '../components/field';
 import { getErrorMessage } from '../utils/form';
 import { useRouter } from 'next/router';
-import { Container, Row, Col } from 'styled-bootstrap-grid';
+import { Container, Row } from 'styled-bootstrap-grid';
 
 const SignInMutation = gql`
   mutation SignInMutation($email: String!, $password: String!) {

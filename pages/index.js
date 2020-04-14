@@ -3,7 +3,7 @@ import gql from 'graphql-tag';
 import Link from 'next/link';
 import { useQuery } from '@apollo/react-hooks';
 import { useRouter } from 'next/router';
-import { Container, Row, Col } from 'styled-bootstrap-grid';
+import { Container, Row } from 'styled-bootstrap-grid';
 
 const CurrentUserQuery = gql`
   query CurrentUserQuery {

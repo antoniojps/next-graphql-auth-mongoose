@@ -48,7 +48,7 @@
     "styled-bootstrap-grid": "^3.1.0",
     "styled-components": "^5.0.1",
     "uuid": "^7.0.2",
-    "validator": "^12.2.0"
+    "validator": "^13.7.0"
   },
   "author": "",
   "license": "ISC",
